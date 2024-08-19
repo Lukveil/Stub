@@ -1,0 +1,2 @@
+# Stub
+Stub for boomq
