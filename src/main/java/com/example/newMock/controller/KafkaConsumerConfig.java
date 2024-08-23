@@ -22,7 +22,7 @@ public class KafkaConsumerConfig {
         final String host_name = "localhost";
         final int port = 9093;
         final String group_name = "group4";
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.14.201" + ":" + "9093");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, host_name + ":" + port);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, group_name);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -36,4 +36,6 @@ public class KafkaConsumerConfig {
         return factory;
     }
 }
+
+
 
