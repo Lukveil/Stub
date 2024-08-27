@@ -1,13 +1,9 @@
 package com.example.newMock.Model;
 
-import lombok.*;
+import lombok.Data;
 
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
+@Data
 public class ResponseDTO {
     private String message;
 }
