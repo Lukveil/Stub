@@ -1,17 +1,16 @@
 [tool.poetry]
-name = "pythonproject"
+name = "fastapi-kafka-app"
 version = "0.1.0"
 description = ""
 authors = ["Lukveil <e.deckdee@gmail.com>"]
 readme = "README.md"
+packages = [{include = "fastapi_kafka_app"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-flask = "^3.0.3"
+fastapi = "^0.112.1"
 confluent-kafka = "^2.5.0"
-gunicorn = "^23.0.0"
-setuptools = "67.4.0"
-gevent = "^24.2.1"
+uvicorn = "^0.30.6"
 
 
 [build-system]
