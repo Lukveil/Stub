@@ -25,10 +25,8 @@ RUN poetry install --no-dev
 # Копируем оставшиеся файлы проекта
 ADD . /app
 
-# Открываем порт для fastAPI приложения
-EXPOSE 8000
-
 # Запускаем приложение
-ENTRYPOINT ["poetry", "run", "python", "main.py", "--kafka-broker", "localhost:8083", "--kafka-topic", "topic", "--timeout", "0.1"]
-
-#CMD ["poetry", "run", "python", "app.py", "--kafka-broker", "localhost:8083", "--kafka-topic", "topic", "--timeout", "0.1"]
+# неизменяемые
+ENTRYPOINT ["poetry", "run", "python", "main.py"]
+# изменяемые
+CMD ["--kafka-broker", "kafka4:9093", "--kafka-topic", "group4", "--timeout", "0.1"]

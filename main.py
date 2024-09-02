@@ -15,20 +15,16 @@ from argparse import ArgumentParser
 
 class AnsiColor(Enum):
     RESET = "\x1b[0m"
-    BOLD = "\x1b[1m"
     UNDERLINE = "\x1b[4m"
     REVERSED = "\x1b[7m"
-    HIDDEN = "\x1b[8m"
     STRIKETHROUGH = "\x1b[9m"
 
-    BLACK = "\x1b[30m"
     RED = "\x1b[31m"
     GREEN = "\x1b[32m"
     YELLOW = "\x1b[33m"
     BLUE = "\x1b[34m"
     MAGENTA = "\x1b[35m"
     CYAN = "\x1b[36m"
-    WHITE = "\x1b[37m"
 
     BLACK_BACKGROUND = "\x1b[40m"
     RED_BACKGROUND = "\x1b[41m"
@@ -37,7 +33,6 @@ class AnsiColor(Enum):
     BLUE_BACKGROUND = "\x1b[44m"
     MAGENTA_BACKGROUND = "\x1b[45m"
     CYAN_BACKGROUND = "\x1b[46m"
-    WHITE_BACKGROUND = "\x1b[47m"
 
 
 class RemoveColorFormatter(Formatter):
@@ -77,15 +72,13 @@ def create_app(kafka_broker: str, kafka_topic: str, timeout:int) -> FastAPI:
     producer = Producer({
         'bootstrap.servers': KAFKA_BROKER,
         'acks': 'all',
-        'batch.size': 16384,  # 16 KB
-        'linger.ms': 50,  # 50 миллисекунд ожидания
+	'batch.size': 16384,  # 16 KB
+        'linger.ms': 300,  #  миллисекунд ожидания
     })
     consumer = Consumer({
         'bootstrap.servers': KAFKA_BROKER,
-        'group.id': 'kafka_mock_group',
-        'auto.offset.reset': 'latest',
-        'request.timeout.ms': 200,  # Таймаут запроса
-        'delivery.timeout.ms': 200  # Таймаут доставки
+	'group.id': '4',
+	'auto.offset.reset': 'latest',
     })
     consumer.subscribe([KAFKA_TOPIC])
 
@@ -95,17 +88,19 @@ def create_app(kafka_broker: str, kafka_topic: str, timeout:int) -> FastAPI:
             # Отправляем сообщение в Kafka
             logger.info(f'{AnsiColor.YELLOW.value}Sending message to Kafka: {msg.message}{AnsiColor.RESET.value}')
             producer.produce(kafka_topic, value=msg.message)
-            logger.info(f'{AnsiColor.YELLOW.value}Message produced: {msg.message}{AnsiColor.RESET.value}')
             try:
+                logger.info(f'{AnsiColor.YELLOW.value}Message produced: {msg.message}{AnsiColor.RESET.value}')
+
                 # Метод flush() блокирует выполнение программы до тех пор, пока все сообщения не будут отправлены и подтверждены.
-                producer.flush(timeout=MAX_WAIT)
+                producer.flush(timeout=0.1)
+                logger.info(f'{AnsiColor.YELLOW.value}Producer flushed: {msg.message}{AnsiColor.RESET.value}')
             except KafkaException as e:
                 logger.error(f"{AnsiColor.RED.value}Flush error: {e}{AnsiColor.RESET.value}")
 
             logger.info(f'{AnsiColor.YELLOW.value}Producer flushed: {msg.message}{AnsiColor.RESET.value}')
             return {"status": "Message sent"}
         except KafkaException as e:
-            logger.error(f'Kafka exception: {e}')
+            logger.error(f'Kafka exception12312421431234: {e}')
             raise HTTPException(status_code=500, detail=str(e))
 
     @app.get("/receive")
@@ -117,7 +112,7 @@ def create_app(kafka_broker: str, kafka_topic: str, timeout:int) -> FastAPI:
             except OSError as e:
                 logger.error(f'{AnsiColor.RED.value}Interrupting a system call: {e}{AnsiColor.RESET.value}')
             # Получаем последнее сообщение из Kafka
-            msg = consumer.poll(timeout=TIMEOUT)  # конвертируем миллисекунды в секунды для тайм-аута
+            msg = consumer.poll(timeout=0.1)
             if msg is None:
                 logger.info(f'{AnsiColor.GREEN.value}Message received: {msg}{AnsiColor.RESET.value}')
                 raise HTTPException(status_code=404, detail="No message available")
@@ -126,6 +121,7 @@ def create_app(kafka_broker: str, kafka_topic: str, timeout:int) -> FastAPI:
                     raise HTTPException(status_code=404, detail="No new messages")
                 else:
                     raise KafkaException(msg.error())
+            logger.info(f'{AnsiColor.GREEN.value}Message received: {msg.value().decode("utf-8")}{AnsiColor.RESET.value}')
             return {"message": msg.value().decode('utf-8')}
         except KafkaException as e:
             logger.error(f'Kafka exception: {e}')
@@ -144,7 +140,7 @@ def main():
     app = create_app(args.kafka_broker, args.kafka_topic, args.timeout)
 
     import uvicorn
-    uvicorn.run(app, host='0.0.0.0', port=8000, log_level="debug")
+    uvicorn.run(app, host='0.0.0.0', port=8080)
 
 
 if __name__ == '__main__':
